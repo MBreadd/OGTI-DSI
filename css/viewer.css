@@ -1,0 +1,149 @@
+/* ==========================================================================
+   VISOR INSTITUCIONAL DE DIAGRAMAS DE ARQUITECTURA (SVG / PNG)
+   UNMSM - FISI - DISEÑO DE SISTEMAS DE INFORMACIÓN (2026-2)
+   Estética: Académica, sobria, corporativa y limpia (Cero IA / Cero Neones)
+   ========================================================================== */
+
+:root {
+  --color-primary: #1e3a8a;       /* Azul institucional UNMSM / Corporativo */
+  --color-primary-hover: #172554;
+  --color-accent: #0284c7;        /* Azul técnico sobrio */
+  --color-slate-900: #0f172a;     /* Texto principal */
+  --color-slate-700: #334155;     /* Texto secundario */
+  --color-slate-500: #64748b;     /* Texto terciario / metadatos */
+  --color-slate-200: #e2e8f0;     /* Bordes sutiles */
+  --color-slate-100: #f1f5f9;     /* Fondos secundarios */
+  --color-slate-50: #f8fafc;      /* Fondo de la interfaz */
+  --color-white: #ffffff;
+}
+
+/* Scrollbars limpias y discretas */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Lienzo de visualización */
+.viewport-canvas {
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+  cursor: grab;
+  background-color: #ffffff;
+  transition: background-color 0.2s ease;
+}
+
+.viewport-canvas.is-panning {
+  cursor: grabbing !important;
+}
+
+/* Fondos técnicos para proyector */
+.canvas-bg-white {
+  background-color: #ffffff;
+}
+
+.canvas-bg-grid {
+  background-color: #f8fafc;
+  background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.canvas-bg-dark {
+  background-color: #0f172a;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.canvas-bg-dark .svg-wrapper svg,
+.canvas-bg-dark .image-wrapper img {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Capa de transformación */
+.svg-transform-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 0 0;
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.svg-transform-layer > * {
+  pointer-events: auto;
+}
+
+/* Contenedores para SVG e Imágenes PNG */
+.svg-wrapper,
+.image-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+}
+
+.svg-wrapper svg {
+  display: block;
+  max-width: none;
+  max-height: none;
+  background: #ffffff;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.diagram-render-img {
+  display: block;
+  max-width: none;
+  max-height: none;
+  background: #ffffff;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Tarjeta Fallback Placeholder (Sobria y Académica) */
+.fallback-card {
+  max-width: 600px;
+  width: 90%;
+  margin: auto;
+  background: #ffffff;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Controles Flotantes HUD */
+.hud-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Botones de navegación */
+.btn-nav-action {
+  transition: all 0.15s ease-in-out;
+}
+.btn-nav-action:active {
+  transform: translateY(1px);
+}

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50 text-slate-900">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visor de Diagramas de Arquitectura — OGTI UNMSM (Caso B)</title>
+  <meta name="description" content="Visor estático y modular de diagramas de ingeniería de software para exposición oral del Caso B: Sistema de Mesa de Ayuda de TI (Service Desk) - OGTI UNMSM.">
+
+  <!-- Tipografía: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Librería svg-pan-zoom CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+
+  <!-- Estilos Corporativos y Académicos -->
+  <link rel="stylesheet" href="css/viewer.css">
+</head>
+<body class="h-full flex flex-col font-sans overflow-hidden bg-slate-50 text-slate-900 select-none">
+
+  <!-- ========================================================================
+       1. ENCABEZADO INSTITUCIONAL DISCRETO Y PROFESIONAL
+       ======================================================================== -->
+  <header class="bg-white border-b border-slate-200 shadow-xs z-30 flex-shrink-0">
+    <div class="px-4 lg:px-6 h-14 flex items-center justify-between">
+      
+      <!-- Identidad Institucional -->
+      <div class="flex items-center space-x-3">
+        <button 
+          id="btn-toggle-sidebar" 
+          type="button" 
+          class="lg:hidden p-1.5 rounded border border-slate-300 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
+          aria-label="Abrir catálogo de diagramas">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+
+        <div class="flex items-center space-x-2.5">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-900 border border-blue-200">
+            UNMSM • FISI
+          </span>
+          <div>
+            <h1 class="text-xs sm:text-sm font-bold text-slate-900 tracking-tight leading-tight">
+              Caso B — Sistema de Mesa de Ayuda de TI (Service Desk) / OGTI
+            </h1>
+            <p class="hidden sm:block text-[11px] text-slate-500 leading-none mt-0.5">
+              Diseño de Sistemas de Información (2026-2) • Docente: Ing. Teodoro Andrade Mogollón
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Herramientas de Exposición -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        
+        <!-- Cronómetro discreto para la exposición oral (10-15 min) -->
+        <div class="flex items-center space-x-2 bg-slate-100 border border-slate-200 rounded px-2.5 py-1">
+          <span class="text-[10px] font-medium text-slate-500 uppercase tracking-wide">Tiempo:</span>
+          <span id="timer-display" class="font-mono font-bold text-xs text-slate-900">00:00</span>
+          <button 
+            id="btn-timer-toggle" 
+            type="button" 
+            class="text-[11px] font-medium text-blue-800 hover:text-blue-950 underline px-1 cursor-pointer"
+            title="Iniciar o pausar cronómetro (Tecla T)">
+            Iniciar
+          </button>
+          <button 
+            id="btn-timer-reset" 
+            type="button" 
+            class="text-[11px] font-medium text-slate-500 hover:text-slate-800 px-1 cursor-pointer"
+            title="Reiniciar cronómetro">
+            Reset
+          </button>
+        </div>
+
+        <!-- Botón Integrantes del Equipo -->
+        <button 
+          id="btn-open-team"
+          type="button"
+          class="inline-flex items-center space-x-1.5 px-2.5 py-1 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded shadow-xs transition"
+          title="Ver datos del equipo y docente">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <span class="hidden sm:inline">Equipo (5)</span>
+        </button>
+
+        <!-- Botón Notas de Exposición -->
+        <button 
+          id="btn-toggle-notes"
+          type="button"
+          class="inline-flex items-center space-x-1 px-2.5 py-1 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded shadow-xs transition"
+          title="Ver notas de defensa oral (Tecla N)">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span class="hidden md:inline">Notas</span>
+        </button>
+
+        <!-- Botón Atajos de Teclado -->
+        <button 
+          id="btn-open-shortcuts"
+          type="button"
+          class="px-2 py-1 text-xs font-mono font-medium text-slate-600 bg-white hover:bg-slate-50 border border-slate-300 rounded shadow-xs transition"
+          title="Ver atajos de teclado (?)">
+          ?
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       2. LAYOUT PRINCIPAL: SIDEBAR + PANEL CENTRAL DEL VISOR
+       ======================================================================== -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/40 z-30 lg:hidden hidden"></div>
+
+    <!-- ======================================================================
+         SIDEBAR: LISTA DE LOS 11 DIAGRAMAS
+         ====================================================================== -->
+    <aside 
+      id="sidebar" 
+      class="fixed lg:static inset-y-0 left-0 z-40 w-80 bg-white border-r border-slate-200 flex flex-col transition-transform duration-200 ease-in-out -translate-x-full lg:translate-x-0 shadow-sm">
+      
+      <!-- Encabezado Sidebar -->
+      <div class="p-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
+        <span class="text-xs font-semibold text-slate-800 uppercase tracking-wide">
+          Diagramas Arquitectónicos (11)
+        </span>
+        <span class="text-[10px] font-mono font-medium text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
+          Semestre 2026-2
+        </span>
+      </div>
+
+      <!-- Buscador de diagramas -->
+      <div class="p-2.5 border-b border-slate-200 bg-white">
+        <div class="relative">
+          <input 
+            id="search-input"
+            type="text" 
+            placeholder="Buscar por nombre o archivo..." 
+            class="w-full bg-slate-50 border border-slate-300 rounded pl-7 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-700 focus:bg-white transition">
+          <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Lista de diagramas con scroll -->
+      <div id="diagram-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+        <!-- Renderizado dinámicamente por svg-viewer.js -->
+      </div>
+
+      <!-- Footer del Sidebar -->
+      <div class="p-2.5 bg-slate-50 border-t border-slate-200 text-[11px] text-slate-600 flex items-center justify-between">
+        <span>Docente: <strong>Teodoro Andrade Mogollón</strong></span>
+        <span class="font-mono text-slate-400 text-[10px]">Teclas: 1-9, 0</span>
+      </div>
+    </aside>
+
+    <!-- ======================================================================
+         PANEL CENTRAL AMPLIO: VISOR VECTORIAL SVG
+         ====================================================================== -->
+    <main class="flex-1 flex flex-col min-w-0 bg-white relative overflow-hidden">
+      
+      <!-- Barra superior de navegación de diagramas -->
+      <div class="h-11 bg-white border-b border-slate-200 px-4 flex items-center justify-between flex-shrink-0 z-20">
+        <div class="flex items-center space-x-2.5 overflow-hidden">
+          <span id="current-diagram-badge" class="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-slate-100 text-slate-700 border border-slate-200 flex-shrink-0">
+            1 de 11
+          </span>
+          <div class="truncate">
+            <span id="header-diagram-title" class="font-bold text-xs sm:text-sm text-slate-900 truncate">
+              1. Diagrama BPMN
+            </span>
+            <span class="text-slate-400 mx-1.5 hidden sm:inline">•</span>
+            <span id="header-diagram-category" class="text-xs text-slate-500 hidden sm:inline">
+              Negocio y Requerimientos
+            </span>
+          </div>
+        </div>
+
+        <!-- Botones de anterior / siguiente -->
+        <div class="flex items-center space-x-1.5 flex-shrink-0">
+          <button 
+            id="btn-prev-diagram" 
+            type="button" 
+            class="btn-nav-action px-2.5 py-1 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-40 rounded border border-slate-300 flex items-center space-x-1 shadow-xs"
+            title="Diagrama anterior (←)">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            <span class="hidden sm:inline">Anterior</span>
+          </button>
+
+          <button 
+            id="btn-next-diagram" 
+            type="button" 
+            class="btn-nav-action px-2.5 py-1 text-xs font-semibold text-white bg-blue-800 hover:bg-blue-900 disabled:opacity-40 rounded flex items-center space-x-1 shadow-xs"
+            title="Siguiente diagrama (→)">
+            <span class="hidden sm:inline">Siguiente</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Lienzo de renderizado -->
+      <div id="viewport-canvas" class="viewport-canvas canvas-bg-white flex-1 relative w-full h-full">
+        
+        <!-- Indicador de Carga -->
+        <div id="viewer-loader" class="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-xs z-30 hidden">
+          <div class="flex items-center space-x-2 text-xs font-medium text-slate-700 bg-white px-3 py-2 rounded border border-slate-200 shadow-sm">
+            <div class="w-4 h-4 border-2 border-slate-300 border-t-blue-700 rounded-full animate-spin"></div>
+            <span>Cargando diagrama...</span>
+          </div>
+        </div>
+
+        <!-- Capa Transformable del SVG -->
+        <div id="svg-transform-layer" class="svg-transform-layer">
+          <div id="svg-content-container" class="w-full h-full flex items-center justify-center">
+            <!-- Inyección del SVG limpio o tarjeta Fallback -->
+          </div>
+        </div>
+
+        <!-- ====================================================================
+             CONTROLES FLOTANTES HUD (MINIMALISTAS Y SOBRIOS)
+             ==================================================================== -->
+        <div class="absolute bottom-4 right-4 z-20 flex items-center gap-1 p-1 rounded-lg hud-card">
+          
+          <!-- Zoom Out -->
+          <button 
+            id="btn-zoom-out" 
+            type="button" 
+            class="p-1.5 rounded text-slate-700 hover:bg-slate-100 transition"
+            title="Reducir zoom (Tecla -)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+            </svg>
+          </button>
+
+          <!-- Nivel de zoom -->
+          <div class="px-2 py-0.5 min-w-[46px] text-center font-mono text-xs font-semibold text-slate-800">
+            <span id="zoom-percentage-text">100%</span>
+          </div>
+
+          <!-- Zoom In -->
+          <button 
+            id="btn-zoom-in" 
+            type="button" 
+            class="p-1.5 rounded text-slate-700 hover:bg-slate-100 transition"
+            title="Aumentar zoom (Tecla +)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+          </button>
+
+          <div class="w-px h-4 bg-slate-200 mx-0.5"></div>
+
+          <!-- Ajustar a ventana -->
+          <button 
+            id="btn-zoom-fit" 
+            type="button" 
+            class="p-1.5 rounded text-slate-700 hover:bg-slate-100 transition"
+            title="Ajustar diagrama a la ventana">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+            </svg>
+          </button>
+
+          <!-- Restablecer (Reset 100%) -->
+          <button 
+            id="btn-zoom-reset" 
+            type="button" 
+            class="p-1.5 rounded text-slate-700 hover:bg-slate-100 transition"
+            title="Restablecer vista original (Tecla R)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+          </button>
+
+          <div class="w-px h-4 bg-slate-200 mx-0.5"></div>
+
+          <!-- Selector de Fondo -->
+          <div class="flex items-center space-x-1 px-1">
+            <button id="btn-bg-white" class="w-5 h-5 rounded bg-white border border-slate-800" title="Fondo Blanco"></button>
+            <button id="btn-bg-grid" class="w-5 h-5 rounded bg-slate-100 border border-slate-300" title="Fondo Cuadrícula"></button>
+            <button id="btn-bg-dark" class="w-5 h-5 rounded bg-slate-900 border border-slate-700" title="Modo Oscuro"></button>
+          </div>
+
+          <div class="w-px h-4 bg-slate-200 mx-0.5"></div>
+
+          <!-- Pantalla Completa -->
+          <button 
+            id="btn-fullscreen" 
+            type="button" 
+            class="p-1.5 rounded text-slate-700 hover:bg-slate-100 transition"
+            title="Pantalla Completa (Tecla F)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
+            </svg>
+          </button>
+
+        </div>
+
+        <!-- Indicador de ayuda discreto en esquina inferior izquierda -->
+        <div class="absolute bottom-4 left-4 z-20 hidden md:flex items-center space-x-2 px-2.5 py-1 rounded bg-white/90 border border-slate-200 text-[11px] text-slate-500 font-mono shadow-xs">
+          <span>Arrastre: Mover</span>
+          <span>•</span>
+          <span>Rueda: Zoom</span>
+          <span>•</span>
+          <span>F: Pantalla completa</span>
+        </div>
+
+      </div>
+
+      <!-- ====================================================================
+           NOTAS DE EXPOSICIÓN (DRAWER LATERAL SOBRIO)
+           ==================================================================== -->
+      <aside 
+        id="notes-drawer" 
+        class="absolute top-11 bottom-0 right-0 w-80 sm:w-96 bg-white border-l border-slate-200 z-30 p-5 overflow-y-auto transform transition-transform duration-200 ease-in-out translate-x-full shadow-lg flex flex-col justify-between">
+        
+        <div>
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700">Guía de Exposición Oral</h2>
+            <button id="btn-close-notes" class="p-1 rounded text-slate-400 hover:text-slate-700 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="mt-4">
+            <span id="notes-view-type" class="text-[11px] font-mono font-medium text-blue-800 uppercase">
+              Modelado de Negocio
+            </span>
+            <h3 id="notes-title" class="text-base font-bold text-slate-900 mt-0.5 leading-snug">
+              1. Diagrama BPMN
+            </h3>
+            <p id="notes-desc" class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Descripción rápida del diagrama y su propósito dentro del sistema.
+            </p>
+          </div>
+
+          <div class="mt-5">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-800 mb-2">
+              Puntos Clave para la Exposición (60s)
+            </h4>
+            <ul id="notes-list" class="space-y-2 mt-2">
+              <!-- Renderizado por JS -->
+            </ul>
+          </div>
+
+          <div class="mt-6 p-3 bg-slate-50 rounded border border-slate-200 text-xs text-slate-700">
+            <p class="font-semibold text-slate-800 text-[11px] uppercase tracking-wide">Pregunta de Evaluación Típica:</p>
+            <p class="mt-1 text-[11px] leading-relaxed text-slate-600">
+              Justifique cómo este diagrama conecta los requerimientos de la OGTI con los SLAs de atención y la arquitectura en capas.
+            </p>
+          </div>
+        </div>
+
+        <div class="pt-4 mt-6 border-t border-slate-200 text-[11px] text-slate-400 font-mono text-center">
+          UNMSM • FISI • 2026-2
+        </div>
+      </aside>
+
+    </main>
+  </div>
+
+  <!-- ========================================================================
+       3. PIE DE PÁGINA ACADÉMICO: INTEGRANTES Y DOCENTE
+       ======================================================================== -->
+  <footer class="bg-white border-t border-slate-200 py-2 px-4 flex-shrink-0 z-20">
+    <div class="flex flex-col md:flex-row items-center justify-between text-xs text-slate-600 gap-2">
+      
+      <div class="flex items-center space-x-2">
+        <span class="font-semibold text-slate-800">UNMSM — FISI</span>
+        <span class="text-slate-300">|</span>
+        <span>Docente: <strong class="text-slate-800">Teodoro Andrade Mogollón</strong></span>
+        <span class="text-slate-300 hidden sm:inline">|</span>
+        <span class="text-slate-500 hidden sm:inline">Caso B: Mesa de Ayuda de TI (OGTI)</span>
+      </div>
+
+      <div class="flex items-center space-x-1.5 overflow-x-auto max-w-full text-[11px]">
+        <span class="text-slate-500 font-medium">Integrantes:</span>
+        <span class="text-slate-800 font-medium">Granda, Quezada, Quispe, Saldaña, Treviño</span>
+        <button 
+          type="button" 
+          onclick="document.getElementById('btn-open-team').click()" 
+          class="text-blue-700 hover:text-blue-900 underline ml-1 cursor-pointer font-medium">
+          [Ver Códigos]
+        </button>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       4. MODAL: INTEGRANTES DEL EQUIPO Y DATOS OFICIALES
+       ======================================================================== -->
+  <div id="team-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white border border-slate-200 rounded-lg max-w-lg w-full p-6 shadow-xl relative">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div>
+          <span class="text-[11px] font-mono text-blue-800 uppercase font-semibold">UNMSM • FISI 2026-2</span>
+          <h3 class="text-base font-bold text-slate-900">Datos Académicos del Proyecto</h3>
+        </div>
+        <button id="btn-close-team" class="p-1 rounded text-slate-400 hover:text-slate-700 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Datos del Curso -->
+      <div class="mt-4 p-3 bg-slate-50 rounded border border-slate-200 text-xs space-y-1">
+        <p><strong class="text-slate-700">Curso:</strong> Diseño de Sistemas de Información (Semestre 2026-2)</p>
+        <p><strong class="text-slate-700">Docente:</strong> Ing. Teodoro Andrade Mogollón</p>
+        <p><strong class="text-slate-700">Caso de Estudio:</strong> Caso B — Sistema de Mesa de Ayuda de TI (Service Desk) / OGTI</p>
+      </div>
+
+      <!-- Lista Oficial de Integrantes -->
+      <div class="mt-4">
+        <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
+          Integrantes Oficiales:
+        </h4>
+        <div class="space-y-1.5">
+          
+          <div class="p-2.5 bg-white rounded border border-slate-200 flex items-center justify-between text-xs">
+            <span class="font-medium text-slate-800">1. Granda Salazar, Rodrigo Christopher</span>
+            <span class="font-mono text-slate-700 font-semibold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">24200017</span>
+          </div>
+
+          <div class="p-2.5 bg-white rounded border border-slate-200 flex items-center justify-between text-xs">
+            <span class="font-medium text-slate-800">2. Quezada Pairazaman, Sebastian Emanuel</span>
+            <span class="font-mono text-slate-700 font-semibold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">24200030</span>
+          </div>
+
+          <div class="p-2.5 bg-white rounded border border-slate-200 flex items-center justify-between text-xs">
+            <span class="font-medium text-slate-800">3. Quispe Arango, Juan Pablo</span>
+            <span class="font-mono text-slate-700 font-semibold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">24200121</span>
+          </div>
+
+          <div class="p-2.5 bg-white rounded border border-slate-200 flex items-center justify-between text-xs">
+            <span class="font-medium text-slate-800">4. Saldaña Sánchez, Luis Mario</span>
+            <span class="font-mono text-slate-700 font-semibold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">24200038</span>
+          </div>
+
+          <div class="p-2.5 bg-white rounded border border-slate-200 flex items-center justify-between text-xs">
+            <span class="font-medium text-slate-800">5. Treviño Alvarado, Milagros Sofia</span>
+            <span class="font-mono text-slate-700 font-semibold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">24200219</span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="mt-5 text-right">
+        <button 
+          type="button" 
+          onclick="document.getElementById('team-modal').classList.add('hidden')"
+          class="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded text-xs transition">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       5. MODAL: ATAJOS DE TECLADO
+       ======================================================================== -->
+  <div id="shortcuts-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white border border-slate-200 rounded-lg max-w-sm w-full p-6 shadow-xl relative">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <h3 class="text-sm font-bold text-slate-900">Atajos de Teclado</h3>
+        <button id="btn-close-shortcuts" class="p-1 rounded text-slate-400 hover:text-slate-700 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="mt-3 space-y-2 text-xs">
+        <div class="flex items-center justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-700">Siguiente diagrama</span>
+          <kbd class="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded border border-slate-200">→</kbd>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-700">Diagrama anterior</span>
+          <kbd class="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded border border-slate-200">←</kbd>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-700">Saltar a diagrama 1 al 9</span>
+          <kbd class="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded border border-slate-200">1 - 9</kbd>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-700">Saltar a diagrama 10</span>
+          <kbd class="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded border border-slate-200">0</kbd>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-700">Zoom in / Zoom out</span>
+          <kbd class="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded border border-slate-200">+ / -</kbd>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-700">Restablecer vista</span>
+          <kbd class="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded border border-slate-200">R</kbd>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-slate-100">
+          <span class="text-slate-700">Pantalla completa</span>
+          <kbd class="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded border border-slate-200">F</kbd>
+        </div>
+        <div class="flex items-center justify-between py-1">
+          <span class="text-slate-700">Cronómetro</span>
+          <kbd class="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded border border-slate-200">T</kbd>
+        </div>
+      </div>
+
+      <div class="mt-4 text-right">
+        <button 
+          type="button" 
+          onclick="document.getElementById('shortcuts-modal').classList.add('hidden')"
+          class="px-3 py-1 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded text-xs transition">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Controlador Vanilla JS -->
+  <script src="js/svg-viewer.js"></script>
+</body>
+</html>
